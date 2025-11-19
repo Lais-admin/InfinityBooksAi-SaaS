@@ -12,7 +12,7 @@ export async function POST(req) {
     }
 
     const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    // Usando o modelo Flash que é rápido e barato para volume
+    // Usando o modelo Pro
     const model = genai.getGenerativeModel({ model: "gemini-2.5-pro" });
 
     let systemInstruction = "";
