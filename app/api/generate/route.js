@@ -13,7 +13,7 @@ export async function POST(req) {
 
     const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     // Usando o modelo Flash que é rápido e barato para volume
-    const model = genai.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genai.getGenerativeModel({ model: "gemini-2.5-pro" });
 
     let systemInstruction = "";
     if (mode === "receitas") {
