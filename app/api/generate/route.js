@@ -14,7 +14,7 @@ export async function POST(req) {
 
     // 2. CONFIGURAÇÃO DA IA
     const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genai.getGenerativeModel({ model: "gemini-pro" });
+    const model = genai.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     // 3. MONTAGEM DO PROMPT
     let systemInstruction = "";
