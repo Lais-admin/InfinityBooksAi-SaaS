@@ -104,7 +104,7 @@ export default function Home() {
 
         <div className="max-w-2xl w-full bg-zinc-900 border border-amber-900/30 p-8 rounded-2xl shadow-2xl relative z-10">
           
-          {/* BARRA DEGRADE NO TOPO (A que você pediu!) */}
+          {/* BARRA DEGRADE NO TOPO */}
           <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 rounded-t-2xl"></div>
 
           <div className="text-center mb-8 mt-2">
@@ -194,8 +194,109 @@ export default function Home() {
     );
   }
 
-  // TELA 2: EDITOR E PREVIEW (Mantivemos igual pois já estava boa, só garantindo imports)
+  // TELA 2: EDITOR E PREVIEW
   return (
     <div className="min-h-screen bg-zinc-900 flex flex-col md:flex-row">
       {/* BARRA LATERAL DE EDIÇÃO */}
-      <div className="w-full md:w-80 bg-zinc-950 p-6 border-r border-zinc
+      <div className="w-full md:w-80 bg-zinc-950 p-6 border-r border-zinc-800 overflow-y-auto z-20 shadow-2xl">
+        <button onClick={() => setStep(1)} className="flex items-center text-zinc-400 hover:text-amber-500 transition mb-8 font-semibold"><ChevronLeft size={20} /> Voltar ao Início</button>
+        
+        <div className="mb-8 pb-8 border-b border-zinc-800">
+           <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-600 mb-2">Personalizar</h2>
+           <p className="text-xs text-zinc-500">Edite antes de baixar</p>
+        </div>
+        
+        <div className="space-y-6">
+            {/* Upload de Capa */}
+            <div>
+            <label className="block text-amber-500 text-sm mb-2 font-bold flex items-center"><Upload size={16} className="mr-2"/> Capa do Ebook</label>
+            <div className="relative">
+                <input type="file" accept="image/*" onChange={handleImageUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"/>
+                <div className="w-full p-3 bg-zinc-900 border border-zinc-700 rounded text-zinc-400 text-sm text-center hover:border-amber-500 hover:text-white transition">
+                    Clique para enviar imagem
+                </div>
+            </div>
+            </div>
+
+            {/* Cor Principal */}
+            <div>
+            <label className="block text-amber-500 text-sm mb-2 font-bold flex items-center"><Palette size={16} className="mr-2"/> Cor dos Títulos</label>
+            <div className="flex items-center gap-2 bg-zinc-900 p-2 rounded border border-zinc-700">
+                <input type="color" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="w-8 h-8 bg-transparent cursor-pointer border-none outline-none"/>
+                <span className="text-xs text-zinc-400 uppercase">{primaryColor}</span>
+            </div>
+            </div>
+
+            {/* Tamanho da Fonte */}
+            <div>
+            <label className="block text-amber-500 text-sm mb-2 font-bold flex items-center"><Type size={16} className="mr-2"/> Tamanho do Texto: {fontSize}px</label>
+            <input type="range" min="12" max="24" value={fontSize} onChange={(e) => setFontSize(e.target.value)} className="w-full accent-amber-500 h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer"/>
+            </div>
+        </div>
+
+        <button onClick={handleDownloadPDF} className="w-full mt-10 py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold rounded-xl flex items-center justify-center shadow-lg transition-all hover:scale-105">
+          <Download size={20} className="mr-2"/> {status || 'Baixar PDF Final'}
+        </button>
+      </div>
+
+      {/* ÁREA DE PREVIEW */}
+      <div className="flex-1 bg-zinc-800 p-8 overflow-auto flex justify-center relative">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5 pointer-events-none"></div>
+        
+        <div 
+          ref={ebookRef} 
+          className="bg-white text-black shadow-[0_0_50px_rgba(0,0,0,0.5)] w-[210mm] min-h-[297mm] p-[20mm] relative z-10"
+          style={{ fontSize: `${fontSize}px` }}
+        >
+          {/* CAPA */}
+          <div className="flex flex-col items-center justify-center min-h-[800px] text-center mb-20 border-b-4 pb-10" style={{ borderColor: primaryColor }}>
+            {coverImage ? (
+              <img src={coverImage} alt="Capa" className="w-full h-[400px] object-cover rounded-lg shadow-2xl mb-10" />
+            ) : (
+              <div className="w-full h-[350px] bg-zinc-100 border-2 border-dashed border-zinc-300 flex flex-col items-center justify-center rounded-lg mb-10 text-zinc-400 gap-2">
+                <Upload size={40} className="opacity-20"/>
+                <p>Capa do Ebook</p>
+              </div>
+            )}
+            <h1 className="text-5xl font-bold mb-6 leading-tight" contentEditable suppressContentEditableWarning style={{ color: primaryColor }}>
+              {ebookData.title}
+            </h1>
+            <div className="h-1 w-20 mb-6" style={{ backgroundColor: primaryColor }}></div>
+            <p className="text-xl text-zinc-600 font-light" contentEditable suppressContentEditableWarning>Um guia exclusivo gerado por InfinityBooks AI</p>
+          </div>
+
+          {/* CONTEÚDO DOS CAPÍTULOS */}
+          <div className="space-y-14">
+            {ebookData.chapters.map((chap, i) => (
+              <div key={i} className="chapter">
+                <div className="flex items-center gap-4 mb-6">
+                    <span className="text-6xl font-black opacity-10" style={{ color: primaryColor }}>{i + 1}</span>
+                    <h2 
+                    className="text-3xl font-bold pb-2 border-b-2 flex-1" 
+                    style={{ color: primaryColor, borderColor: primaryColor }}
+                    contentEditable 
+                    suppressContentEditableWarning
+                    >
+                    {chap.title}
+                    </h2>
+                </div>
+                <div 
+                  className="prose max-w-none leading-relaxed text-justify text-zinc-800"
+                  contentEditable 
+                  suppressContentEditableWarning
+                  dangerouslySetInnerHTML={{ __html: chap.content }}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* RODAPÉ */}
+          <div className="mt-24 text-center text-[10px] text-zinc-400 border-t pt-6 uppercase tracking-widest">
+            InfinityBooks AI • Documento Oficial
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+// FIM DO ARQUIVO - VERIFIQUE SE COPIOU ATE AQUI
