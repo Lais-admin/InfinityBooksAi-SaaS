@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Adiciona um estilo leve para o texto que vem do GPT, se precisar */
+.prose h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 1.5rem;
+}
+.prose ul {
+  list-style-type: disc;
+  margin-left: 1.5rem;
+}
