@@ -41,8 +41,8 @@ export default function Home() {
     setLoading(true);
     setStatus('💎 Conectando ao Gemini...');
     
-    // Certifique-se de usar a chave que deu certo (2.5 Pro ou 1.5 Pro)
-    const modelToUse = "gemini-1.5-pro"; 
+    // Certifique-se de usar a chave que deu certo (2.5 Pro ou 1.5 Flash)
+    const modelToUse = "gemini-1.5-flash"; 
 
     try {
       const res = await fetch('/api/generate', {
