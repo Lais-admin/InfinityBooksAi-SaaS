@@ -187,7 +187,7 @@ export default function Home() {
               )}
             </button>
 
-            <p className="text-center text-zinc-600 text-xs mt-6">Powered by Gemini 2.5 Pro • Secure Engine</p>
+            <p className="text-center text-zinc-600 text-xs mt-6">Powered by InfinityBooksAi • Secure Engine</p>
           </div>
         </div>
       </div>
