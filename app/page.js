@@ -120,7 +120,7 @@ export default function Home() {
             <button onClick={handleGenerate} disabled={loading} className="w-full py-4 bg-amber-600 hover:bg-amber-500 text-black font-bold rounded text-lg transition">
               {loading ? status : 'Gerar Ebook Premium'}
             </button>
-              <p className="text-center text-zinc-600 text-xs mt-6">Powered by Lais Galliz • Secure Engine</p>
+            <p className="text-center text-zinc-600 text-xs mt-6">Powered by Gemini 2.5 Pro • Secure Engine</p>
           </div>
         </div>
       </div>
@@ -132,4 +132,84 @@ export default function Home() {
     <div className="min-h-screen bg-zinc-900 flex flex-col md:flex-row">
       {/* BARRA LATERAL DE EDIÇÃO */}
       <div className="w-full md:w-80 bg-zinc-950 p-6 border-r border-zinc-800 overflow-y-auto">
-        <button onClick={() => setStep(1)} className="flex items
+        <button onClick={() => setStep(1)} className="flex items-center text-zinc-400 hover:text-white mb-6"><ChevronLeft size={16} /> Voltar</button>
+        <h2 className="text-xl font-bold text-white mb-4">Personalizar</h2>
+        
+        {/* Upload de Capa */}
+        <div className="mb-6">
+          <label className="block text-amber-500 text-sm mb-2 font-bold flex items-center"><Upload size={14} className="mr-2"/> Capa do Ebook</label>
+          <input type="file" accept="image/*" onChange={handleImageUpload} className="text-sm text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-amber-600 file:text-black hover:file:bg-amber-500"/>
+        </div>
+
+        {/* Cor Principal */}
+        <div className="mb-6">
+          <label className="block text-amber-500 text-sm mb-2 font-bold flex items-center"><Palette size={14} className="mr-2"/> Cor dos Títulos</label>
+          <input type="color" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="w-full h-10 bg-transparent cursor-pointer"/>
+        </div>
+
+        {/* Tamanho da Fonte */}
+        <div className="mb-8">
+          <label className="block text-amber-500 text-sm mb-2 font-bold flex items-center"><Type size={14} className="mr-2"/> Tamanho do Texto: {fontSize}px</label>
+          <input type="range" min="12" max="24" value={fontSize} onChange={(e) => setFontSize(e.target.value)} className="w-full accent-amber-500"/>
+        </div>
+
+        <button onClick={handleDownloadPDF} className="w-full py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded flex items-center justify-center shadow-lg">
+          <Download size={18} className="mr-2"/> {status || 'Baixar PDF Final'}
+        </button>
+      </div>
+
+      {/* ÁREA DE PREVIEW (O PAPEL) */}
+      <div className="flex-1 bg-zinc-800 p-8 overflow-auto flex justify-center">
+        <div 
+          ref={ebookRef} 
+          className="bg-white text-black shadow-2xl w-[210mm] min-h-[297mm] p-[20mm]"
+          style={{ fontSize: `${fontSize}px` }}
+        >
+          {/* CAPA */}
+          <div className="flex flex-col items-center justify-center min-h-[800px] text-center mb-20 border-b-4 pb-10" style={{ borderColor: primaryColor }}>
+            {coverImage ? (
+              <img src={coverImage} alt="Capa" className="w-full h-[400px] object-cover rounded-lg shadow-md mb-8" />
+            ) : (
+              <div className="w-full h-[300px] bg-gray-200 flex items-center justify-center rounded-lg mb-8 text-gray-400">
+                Sua imagem de capa aparecerá aqui
+              </div>
+            )}
+            <h1 className="text-5xl font-bold mb-4" contentEditable suppressContentEditableWarning style={{ color: primaryColor }}>
+              {ebookData.title}
+            </h1>
+            <p className="text-xl text-gray-600" contentEditable suppressContentEditableWarning>Um guia exclusivo gerado por InfinityBooks AI</p>
+          </div>
+
+          {/* CONTEÚDO DOS CAPÍTULOS */}
+          <div className="space-y-12">
+            {ebookData.chapters.map((chap, i) => (
+              <div key={i} className="chapter">
+                <h2 
+                  className="text-3xl font-bold mb-6 pb-2 border-b-2" 
+                  style={{ color: primaryColor, borderColor: primaryColor }}
+                  contentEditable 
+                  suppressContentEditableWarning
+                >
+                  {chap.title}
+                </h2>
+                <div 
+                  className="prose max-w-none leading-relaxed text-justify"
+                  contentEditable 
+                  suppressContentEditableWarning
+                  dangerouslySetInnerHTML={{ __html: chap.content }}
+                />
+                {/* Quebra de página visual */}
+                <div className="my-10 border-t border-dashed border-gray-300"></div>
+              </div>
+            ))}
+          </div>
+
+          {/* RODAPÉ */}
+          <div className="mt-20 text-center text-xs text-gray-400 border-t pt-4">
+            Gerado via InfinityBooks AI • Todos os direitos reservados
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
