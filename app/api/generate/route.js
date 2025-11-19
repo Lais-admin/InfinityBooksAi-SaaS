@@ -13,7 +13,7 @@ export async function POST(req) {
 
     const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     // Usando o modelo Pro
-    const model = genai.getGenerativeModel({ model: "gemini-3" });
+    const model = genai.getGenerativeModel({ model: "gemini-3-pro" });
 
     let systemInstruction = "";
     if (mode === "receitas") {
