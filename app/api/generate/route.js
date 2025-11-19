@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
-import { validKeys } from "../../config/keys";
+import { validKeys } from "../../../keys"; // Caminho corrigido
 
 // Lista de Senhas (Movida de volta para keys.js para simplificar)
 // IMPORTANTE: Se você seguiu meu conselho anterior e removeu keys.js, COPIE A LISTA DE CHAVES AQUI DENTRO. 
