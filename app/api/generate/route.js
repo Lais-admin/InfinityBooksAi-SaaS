@@ -25,10 +25,10 @@ export async function POST(req) {
     // 3. CONEXÃO COM GOOGLE
     const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     
-    // IMPORTANTE: Usamos o 'gemini-1.5-pro'
+    // IMPORTANTE: Usamos o 'gemini-2.5-pro'
     // Ele é o modelo mais inteligente LIBERADO publicamente. 
     // Se colocarmos nomes beta (2.5 ou 3), vai dar erro 404.
-    const model = genai.getGenerativeModel({ model: "gemini-pro" });
+    const model = genai.getGenerativeModel({ model: "gemini-2.5-pro" });
 
     // 4. INSTRUÇÕES PARA A IA (PROMPT)
     let systemInstruction = "";
