@@ -118,8 +118,9 @@ export default function Home() {
               <textarea name="desc" rows="3" placeholder="Descreva o que quer no ebook..." onChange={handleChange} className="w-full p-3 bg-zinc-950 border border-zinc-800 rounded text-white outline-none" />
             </div>
             <button onClick={handleGenerate} disabled={loading} className="w-full py-4 bg-amber-600 hover:bg-amber-500 text-black font-bold rounded text-lg transition">
-              {loading ? status : 'Gerar Ebook e Editar'}
+              {loading ? status : 'Gerar Ebook Premium'}
             </button>
+              <p className="text-center text-zinc-600 text-xs mt-6">Powered by Lais Galliz • Secure Engine</p>
           </div>
         </div>
       </div>
