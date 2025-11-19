@@ -1,7 +1,7 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from "openai";
 import { NextResponse } from "next/server";
 
-// 1. LISTA DE SENHAS (Definida aqui mesmo para não ter erro de arquivo)
+// Lista de Senhas (Continua a mesma)
 const VALID_KEYS = [
   "VIP-GOLD-2025",
   "TESTE-ADMIN",
@@ -13,74 +13,47 @@ export async function POST(req) {
     const body = await req.json();
     const { topic, description, userCode, mode } = body;
 
-    // Log para você ver na Vercel o que está chegando
-    console.log("Cliente digitou:", userCode); 
-
-    // 2. VERIFICAÇÃO DE SEGURANÇA
-    // Se o código não estiver na lista, barra a entrada
+    // 1. Validação da Chave
     if (!VALID_KEYS.includes(userCode.trim())) {
       return NextResponse.json({ error: "Chave de Acesso Inválida. Verifique se digitou corretamente." }, { status: 401 });
     }
 
-    // 3. CONEXÃO COM GOOGLE
-    const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    
-    // IMPORTANTE: Usamos o 'gemini-2.5-pro'
-    // Ele é o modelo mais inteligente LIBERADO publicamente. 
-    // Se colocarmos nomes beta (2.5 ou 3), vai dar erro 404.
-    const model = genai.getGenerativeModel({ model: "gemini-2.5-pro" });
+    // 2. Conexão com OpenAI (Pegando a nova chave da Vercel)
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
 
-    // 4. INSTRUÇÕES PARA A IA (PROMPT)
-    let systemInstruction = "";
+    // 3. Instruções para o GPT-4o (Definindo o formato de saída)
+    const systemMessage = `
+    Você é um editor de livros e chef de cozinha renomado, focado em criar conteúdo de alto valor e fácil leitura para um ebook premium. 
+    Seu trabalho é retornar OBRIGATORIAMENTE APENAS um objeto JSON. 
+    O TEMA principal é: "${topic}". O contexto adicional é: "${description}".
     
-    if (mode === "receitas") {
-      systemInstruction = `Você é um Chef Executivo premiado. Crie um ebook de receitas de alto padrão.
-      TEMA: ${topic}
-      DETALHES DO CLIENTE: ${description}
-      
-      REGRAS DE FORMATAÇÃO (JSON):
-      Retorne APENAS um JSON exato com esta estrutura:
-      { 
-        "title": "Título Elegante do Ebook", 
-        "chapters": [ 
-          { 
-            "title": "Nome da Receita", 
-            "content": "<div class='recipe-card'><h3>🛒 Ingredientes</h3><ul><li>Ingrediente 1</li><li>Ingrediente 2</li></ul><h3>🔥 Modo de Preparo</h3><ol><li>Passo 1 detalhado.</li><li>Passo 2 detalhado.</li></ol><div class='chef-secret'><strong>💡 Segredo do Chef:</strong> Dica valiosa.</div></div>" 
-          } 
-        ] 
-      }
-      Gere 4 receitas completas e detalhadas.`;
-    } else {
-      systemInstruction = `Você é um Autor Best-Seller e Especialista no assunto.
-      TEMA: ${topic}
-      DETALHES DO CLIENTE: ${description}
-      
-      REGRAS DE FORMATAÇÃO (JSON):
-      Retorne APENAS um JSON exato com esta estrutura:
-      { 
-        "title": "Título Impactante do Livro", 
-        "chapters": [ 
-          { 
-            "title": "Título do Capítulo", 
-            "content": "<p class='intro'>Introdução envolvente...</p><h3>Subtítulo Relevante</h3><p>Conteúdo profundo e prático...</p><ul><li>Ponto chave</li></ul><div class='highlight'><strong>Importante:</strong> Destaque final.</div>" 
-          } 
-        ] 
-      }
-      Gere 5 capítulos densos (mínimo 400 palavras por capítulo).`;
-    }
+    A estrutura do seu retorno DEVE SER EXATAMENTE:
+    { "title": "Título Impactante do Ebook", "chapters": [ {"title": "Nome do Capítulo", "content": "Seu texto em HTML" } ] }
 
-    // 5. GERAÇÃO
-    const result = await model.generateContent(systemInstruction);
-    const response = await result.response;
-    let text = response.text();
+    REGRAS DE CONTEÚ
+    - Para o modo 'receitas', gere 4 receitas completas, com tags <h3> para Ingredientes e <ol> para Preparo.
+    - Para o modo 'informativo', gere 5 capítulos densos, usando tags <p> e <h3>.
+    `;
     
-    // Limpeza para garantir que o JSON venha puro
-    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+    // 4. Geração com GPT-4o
+    const completion = await openai.chat.completions.create({
+        model: "gpt-4o", // Modelo mais rápido e inteligente
+        messages: [{ role: "system", content: systemMessage }],
+        response_format: { type: "json_object" }, // Garante que a saída é JSON
+    });
 
-    return NextResponse.json(JSON.parse(text));
+    const jsonText = completion.choices[0].message.content;
+    
+    return NextResponse.json(JSON.parse(jsonText));
 
   } catch (error) {
-    console.error("Erro no servidor:", error);
-    return NextResponse.json({ error: "Erro ao conectar com a IA: " + error.message }, { status: 500 });
+    console.error("Erro no Backend:", error);
+    // Erro 401 do OpenAI é a Chave API errada
+    if (error.status === 401) {
+        return NextResponse.json({ error: "ERRO DE CHAVE OPENAI: Sua chave de API está inválida ou expirou. Verifique as Variaveis de Ambiente na Vercel." }, { status: 500 });
+    }
+    return NextResponse.json({ error: "Erro na IA: " + error.message }, { status: 500 });
   }
 }
