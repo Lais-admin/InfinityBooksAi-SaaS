@@ -28,7 +28,7 @@ export async function POST(req) {
     // IMPORTANTE: Usamos o 'gemini-1.5-pro'
     // Ele é o modelo mais inteligente LIBERADO publicamente. 
     // Se colocarmos nomes beta (2.5 ou 3), vai dar erro 404.
-    const model = genai.getGenerativeModel({ model: "gemini-1.5-pro" });
+    const model = genai.getGenerativeModel({ model: "gemini-pro" });
 
     // 4. INSTRUÇÕES PARA A IA (PROMPT)
     let systemInstruction = "";
