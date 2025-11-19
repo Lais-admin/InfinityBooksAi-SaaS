@@ -7,42 +7,56 @@ export async function POST(req) {
     const body = await req.json();
     const { topic, description, userCode, mode } = body;
 
-    // 1. SEGURANÇA: Verifica se a chave existe na lista
     if (!validKeys.includes(userCode)) {
-      return NextResponse.json({ error: "Chave de Acesso Inválida ou Expirada." }, { status: 401 });
+      return NextResponse.json({ error: "Chave de Acesso Inválida." }, { status: 401 });
     }
 
-    // 2. CONFIGURAÇÃO DA IA
     const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genai.getGenerativeModel({ model: "gemini-2.5-pro" });
+    // Usando o modelo Flash que é rápido e barato para volume
+    const model = genai.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    // 3. MONTAGEM DO PROMPT
     let systemInstruction = "";
     if (mode === "receitas") {
-      systemInstruction = `Você é um Chef renomado. Crie um ebook de receitas sofisticado.
-      Tema: ${topic}. Detalhes extras: ${description}.
+      systemInstruction = `Você é um Chef Executivo. Crie um ebook de receitas sofisticado e visualmente rico.
+      Tema: ${topic}. Detalhes: ${description}.
+      Estruture o conteúdo para ser exibido em HTML.
       Retorne EXATAMENTE este formato JSON:
-      { "title": "Titulo do Livro", "chapters": [ { "title": "Nome do Prato", "content": "<h3>Ingredientes</h3>... <h3>Modo de Preparo</h3>..." } ] }
-      Gere pelo menos 5 receitas completas.`;
+      { 
+        "title": "Título Criativo do Livro", 
+        "author": "Chef IA",
+        "chapters": [ 
+          { 
+            "title": "Nome da Receita", 
+            "content": "<div class='recipe-intro'><p>Breve introdução apetitosa sobre o prato.</p></div><div class='recipe-grid'><div><h3>🛒 Ingredientes</h3><ul><li>Item 1</li><li>Item 2</li></ul></div><div><h3>🍳 Modo de Preparo</h3><ol><li>Passo 1 detalhado.</li><li>Passo 2 detalhado.</li></ol></div></div><div class='chef-tip'><strong>💡 Dica do Chef:</strong> Segredo para não errar.</div>" 
+          } 
+        ] 
+      }
+      Gere pelo menos 10 receitas completas.`;
     } else {
-      systemInstruction = `Você é um autor Best-Seller. Crie um ebook informativo denso e rico.
-      Tema: ${topic}. Público/Detalhes: ${description}.
+      systemInstruction = `Você é um Editor de Livros Best-Seller. Crie um ebook informativo, profundo e bem estruturado.
+      Tema: ${topic}. Detalhes: ${description}.
       Retorne EXATAMENTE este formato JSON:
-      { "title": "Titulo do Livro", "chapters": [ { "title": "Titulo Capitulo", "content": "<p>Texto longo e detalhado...</p>" } ] }
-      Gere 5 capítulos longos. Use tags HTML simples (<p>, <h3>, <ul>) para formatar o texto.`;
+      { 
+        "title": "Título Impactante", 
+        "author": "Especialista IA",
+        "chapters": [ 
+          { 
+            "title": "Nome do Capítulo", 
+            "content": "<p class='intro'>Parágrafo introdutório forte.</p><h3>Subtítulo Importante</h3><p>Texto explicativo detalhado...</p><ul><li>Ponto chave 1</li><li>Ponto chave 2</li></ul><div class='highlight'><strong>Importante:</strong> Uma caixa de destaque com informação crucial.</div>" 
+          } 
+        ] 
+      }
+      Gere 5 capítulos densos.`;
     }
 
-    // 4. GERAÇÃO
     const result = await model.generateContent(systemInstruction);
     const response = await result.response;
     let text = response.text();
-    
-    // Limpeza do JSON (caso a IA mande marcadores de código)
     text = text.replace(/```json/g, "").replace(/```/g, "").trim();
 
     return NextResponse.json(JSON.parse(text));
 
   } catch (error) {
-    return NextResponse.json({ error: "Erro no servidor: " + error.message }, { status: 500 });
+    return NextResponse.json({ error: "Erro ao gerar: " + error.message }, { status: 500 });
   }
 }
